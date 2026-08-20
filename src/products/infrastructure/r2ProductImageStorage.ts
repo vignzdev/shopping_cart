@@ -1,3 +1,4 @@
+import { requireEnv } from "@shared/utils/env";
 import {
   DeleteObjectCommand,
   PutObjectCommand,
@@ -5,6 +6,8 @@ import {
 } from "@aws-sdk/client-s3";
 import {
   assertProductImage,
+  productImageContentType,
+  productImageExtension,
   type ProductImageFile,
 } from "@product/domain/productImage";
 import type {
@@ -19,13 +22,9 @@ function getR2Client(): S3Client {
     return client;
   }
 
-  const accountId = process.env.R2_ACCOUNT_ID;
-  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
-
-  if (!accountId || !accessKeyId || !secretAccessKey) {
-    throw new Error("Missing Cloudflare R2 environment variables");
-  }
+  const accountId = requireEnv("R2_ACCOUNT_ID");
+  const accessKeyId = requireEnv("R2_ACCESS_KEY_ID");
+  const secretAccessKey = requireEnv("R2_SECRET_ACCESS_KEY");
 
   client = new S3Client({
     region: "auto",
@@ -40,12 +39,8 @@ function getR2Client(): S3Client {
 }
 
 function getBucketConfig() {
-  const bucket = process.env.R2_BUCKET_NAME;
-  const publicUrl = process.env.R2_PUBLIC_URL;
-
-  if (!bucket || !publicUrl) {
-    throw new Error("Missing Cloudflare R2 bucket configuration");
-  }
+  const bucket = requireEnv("R2_BUCKET_NAME");
+  const publicUrl = requireEnv("R2_PUBLIC_URL");
 
   return {
     bucket,
@@ -60,9 +55,9 @@ export class R2ProductImageStorage implements ProductImageStorage {
   ): Promise<UploadedProductImage> {
     const type = assertProductImage(file);
     const { bucket, publicUrl } = getBucketConfig();
-    const extension = type === "png" ? "png" : "jpg";
+    const extension = productImageExtension(type);
     const key = `products/${productId}/${crypto.randomUUID()}.${extension}`;
-    const contentType = type === "png" ? "image/png" : "image/jpeg";
+    const contentType = productImageContentType(type);
 
     await getR2Client().send(
       new PutObjectCommand({

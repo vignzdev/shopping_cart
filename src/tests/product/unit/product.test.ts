@@ -32,6 +32,10 @@ describe("Product", () => {
     expect(product.description).toBe("Apple Macbook pro");
   });
 
+  it("rejects a name shorter than the minimum", () => {
+    expect(() => makeProduct({ name: "Ab" })).toThrow(ValidationError);
+  });
+
   it("rejects an empty name", () => {
     expect(() => makeProduct({ name: " " })).toThrow(ValidationError);
   });

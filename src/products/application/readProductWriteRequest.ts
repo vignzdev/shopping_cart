@@ -1,4 +1,4 @@
-import type { ProductImageFile } from "@product/domain/productImage";
+import { assertImageCount, type ProductImageFile } from "@product/domain/productImage";
 import { ValidationError } from "@shared/domain/errors";
 import { readJson } from "@shared/utils/http";
 
@@ -33,8 +33,14 @@ async function readMultipart(request: Request): Promise<ProductWritePayload> {
   if (price !== undefined) fields.price = price;
   if (stock !== undefined) fields.stock = stock;
 
-  const imageEntry = form.get("image");
-  if (!(imageEntry instanceof File) || imageEntry.size === 0) {
+  const imageFiles = form
+    .getAll("image")
+    .filter((entry): entry is File => entry instanceof File && entry.size > 0);
+
+  assertImageCount(imageFiles.length);
+
+  const imageEntry = imageFiles[0];
+  if (!imageEntry) {
     return { fields };
   }
 

@@ -1,3 +1,4 @@
+import { ROUTES } from "@/constants/routes";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -38,10 +39,10 @@ export function Navbar({ currentPath = "" }: NavbarProps) {
                 <ul className="grid w-55 gap-0.5 p-1">
                   <li>
                     <NavigationMenuLink
-                      href="/product"
+                      href={ROUTES.PRODUCTS}
                       className="rounded-md p-2 text-sm"
                       data-active={
-                        currentPath.startsWith("/product") || undefined
+                        currentPath.startsWith(ROUTES.PRODUCTS) || undefined
                       }
                     >
                       All products
@@ -49,7 +50,7 @@ export function Navbar({ currentPath = "" }: NavbarProps) {
                   </li>
                   <li>
                     <NavigationMenuLink
-                      href="/cart"
+                      href={ROUTES.CART}
                       className="rounded-md p-2 text-sm"
                     >
                       Shopping cart
@@ -67,7 +68,7 @@ export function Navbar({ currentPath = "" }: NavbarProps) {
                 <ul className="grid w-55 gap-0.5 p-1">
                   <li>
                     <NavigationMenuLink
-                      href="/product"
+                      href={ROUTES.PRODUCTS}
                       className="rounded-md p-2 text-sm"
                     >
                       New arrivals
@@ -75,7 +76,7 @@ export function Navbar({ currentPath = "" }: NavbarProps) {
                   </li>
                   <li>
                     <NavigationMenuLink
-                      href="/product"
+                      href={ROUTES.PRODUCTS}
                       className="rounded-md p-2 text-sm"
                     >
                       Best sellers
@@ -93,7 +94,7 @@ export function Navbar({ currentPath = "" }: NavbarProps) {
                 <ul className="grid w-55 gap-0.5 p-1">
                   <li>
                     <NavigationMenuLink
-                      href="/product"
+                      href={ROUTES.PRODUCTS}
                       className="rounded-md p-2 text-sm"
                     >
                       New arrivals
@@ -101,7 +102,7 @@ export function Navbar({ currentPath = "" }: NavbarProps) {
                   </li>
                   <li>
                     <NavigationMenuLink
-                      href="/product"
+                      href={ROUTES.PRODUCTS}
                       className="rounded-md p-2 text-sm"
                     >
                       Shirts
@@ -119,7 +120,7 @@ export function Navbar({ currentPath = "" }: NavbarProps) {
                 <ul className="grid w-55 gap-0.5 p-1">
                   <li>
                     <NavigationMenuLink
-                      href="/product"
+                      href={ROUTES.PRODUCTS}
                       className="rounded-md p-2 text-sm"
                     >
                       New arrivals
@@ -137,7 +138,7 @@ export function Navbar({ currentPath = "" }: NavbarProps) {
                 <ul className="grid w-55 gap-0.5 p-1">
                   <li>
                     <NavigationMenuLink
-                      href="/product"
+                      href={ROUTES.PRODUCTS}
                       className="rounded-md p-2 text-sm"
                     >
                       Mobiles
@@ -145,7 +146,7 @@ export function Navbar({ currentPath = "" }: NavbarProps) {
                   </li>
                   <li>
                     <NavigationMenuLink
-                      href="/product"
+                      href={ROUTES.PRODUCTS}
                       className="rounded-md p-2 text-sm"
                     >
                       Laptops
@@ -156,7 +157,7 @@ export function Navbar({ currentPath = "" }: NavbarProps) {
             </NavigationMenuItem>
 
             <NavigationMenuItem className="ml-auto">
-              <NavigationMenuLink href="/product" className={navLinkClass}>
+              <NavigationMenuLink href={ROUTES.PRODUCTS} className={navLinkClass}>
                 Manage Products
               </NavigationMenuLink>
             </NavigationMenuItem>

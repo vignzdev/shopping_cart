@@ -21,6 +21,9 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { API_ROUTES } from "@/constants/routes";
+import { IMAGE_UPLOAD } from "@/constants/upload";
+import { PRODUCT_DESCRIPTION, PRODUCT_TITLE } from "@/constants/validation";
 import type { ProductDto } from "@product/application/serializeProduct";
 
 type FormState = {
@@ -49,7 +52,7 @@ export function ProductManager() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   async function loadProducts() {
-    const response = await fetch("/api/products");
+    const response = await fetch(API_ROUTES.PRODUCTS);
     if (!response.ok) {
       throw new Error(await readError(response));
     }
@@ -77,6 +80,12 @@ export function ProductManager() {
     });
     setImagePreview(product.imageUrl);
     setError(null);
+    window.requestAnimationFrame(() => {
+      document.getElementById("product-form")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
   }
 
   function resetForm() {
@@ -85,24 +94,28 @@ export function ProductManager() {
     setImagePreview(null);
   }
 
-  function onImageChange(file: File | null) {
+  function onImageChange(file: File | null, fileList?: FileList | null) {
     if (!file) {
       setForm((current) => ({ ...current, image: null }));
       return;
     }
 
-    const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
-    const allowedType =
-      (file.type === "image/png" && extension === "png") ||
-      (file.type === "image/jpeg" && ["jpg", "jpeg"].includes(extension));
-
-    if (!allowedType) {
-      setError("Image must be a PNG, JPEG, or JPG file");
+    if (fileList && fileList.length > IMAGE_UPLOAD.MAX_IMAGES) {
+      setError(`You can upload at most ${IMAGE_UPLOAD.MAX_IMAGES} images`);
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setError("Image must be 10 MB or smaller");
+    if (
+      !(IMAGE_UPLOAD.ALLOWED_TYPES as readonly string[]).includes(file.type)
+    ) {
+      setError("Image must be a JPEG, PNG, or WebP file");
+      return;
+    }
+
+    if (file.size > IMAGE_UPLOAD.MAX_SIZE) {
+      setError(
+        `Image must be ${IMAGE_UPLOAD.MAX_SIZE / (1024 * 1024)} MB or smaller`,
+      );
       return;
     }
 
@@ -129,7 +142,7 @@ export function ProductManager() {
 
     try {
       const response = await fetch(
-        editingId ? `/api/products/${editingId}` : "/api/products",
+        editingId ? API_ROUTES.product(editingId) : API_ROUTES.PRODUCTS,
         {
           method: editingId ? "PUT" : "POST",
           body: payload,
@@ -155,7 +168,7 @@ export function ProductManager() {
     }
 
     setError(null);
-    const response = await fetch(`/api/products/${product.id}`, {
+    const response = await fetch(API_ROUTES.product(product.id), {
       method: "DELETE",
     });
 
@@ -172,9 +185,9 @@ export function ProductManager() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+    <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-4 overflow-x-clip px-4 py-6 sm:gap-6 sm:px-6 sm:py-8">
+      <div className="min-w-0">
+        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
           Product management
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -184,15 +197,15 @@ export function ProductManager() {
 
       {error ? (
         <Alert className="border-destructive/40 bg-destructive/5">
-          <AlertDescription className="text-destructive">
+          <AlertDescription className="wrap-break-word text-destructive">
             {error}
           </AlertDescription>
         </Alert>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,22rem)_1fr]">
-        <Card>
-          <CardHeader>
+      <div className="grid min-w-0 gap-4 sm:gap-6 lg:grid-cols-[minmax(0,22rem)_1fr]">
+        <Card id="product-form" className="min-w-0 overflow-hidden">
+          <CardHeader className="p-4 sm:p-6">
             <CardTitle>{editingId ? "Edit product" : "Add product"}</CardTitle>
             <CardDescription>
               {editingId
@@ -200,7 +213,7 @@ export function ProductManager() {
                 : "Create a new catalog item."}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <form className="grid gap-4" onSubmit={onSubmit}>
               <div className="grid gap-2">
                 <Label htmlFor="name">Name</Label>
@@ -213,6 +226,8 @@ export function ProductManager() {
                       name: event.target.value,
                     }))
                   }
+                  minLength={PRODUCT_TITLE.MIN_LENGTH}
+                  maxLength={PRODUCT_TITLE.MAX_LENGTH}
                   required
                 />
               </div>
@@ -221,6 +236,7 @@ export function ProductManager() {
                 <Textarea
                   id="description"
                   value={form.description}
+                  maxLength={PRODUCT_DESCRIPTION.MAX_LENGTH}
                   onChange={(event) =>
                     setForm((current) => ({
                       ...current,
@@ -229,7 +245,7 @@ export function ProductManager() {
                   }
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="grid gap-2">
                   <Label htmlFor="price">Price</Label>
                   <Input
@@ -237,6 +253,7 @@ export function ProductManager() {
                     type="number"
                     min="0.01"
                     step="0.01"
+                    inputMode="decimal"
                     value={form.price}
                     onChange={(event) =>
                       setForm((current) => ({
@@ -254,6 +271,7 @@ export function ProductManager() {
                     type="number"
                     min="0"
                     step="1"
+                    inputMode="numeric"
                     value={form.stock}
                     onChange={(event) =>
                       setForm((current) => ({
@@ -265,28 +283,50 @@ export function ProductManager() {
                   />
                 </div>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="image">Image (PNG, JPEG, JPG, max 10 MB)</Label>
+              <div className="grid min-w-0 gap-2">
+                <Label htmlFor="image">
+                  Image
+                  <span className="block text-xs font-normal text-muted-foreground sm:inline sm:text-sm">
+                    {" "}
+                    (JPEG, PNG, WebP, max{" "}
+                    {IMAGE_UPLOAD.MAX_SIZE / (1024 * 1024)} MB)
+                  </span>
+                </Label>
                 <Input
                   id="image"
                   type="file"
-                  accept=".png,.jpg,.jpeg,image/png,image/jpeg"
-                  onChange={(event) => onImageChange(event.target.files?.[0] ?? null)}
+                  className="h-auto max-w-full min-w-0 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm"
+                  accept={IMAGE_UPLOAD.ALLOWED_TYPES.join(",")}
+                  onChange={(event) =>
+                    onImageChange(
+                      event.target.files?.[0] ?? null,
+                      event.target.files,
+                    )
+                  }
                 />
                 {imagePreview ? (
                   <img
                     src={imagePreview}
                     alt="Product preview"
-                    className="h-32 w-full rounded-md border object-cover"
+                    className="h-36 w-full max-w-full rounded-md border object-cover sm:h-32"
                   />
                 ) : null}
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Button type="submit" disabled={loading}>
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap">
+                <Button
+                  type="submit"
+                  className="w-full sm:w-auto"
+                  disabled={loading}
+                >
                   {loading ? "Saving..." : editingId ? "Update" : "Add product"}
                 </Button>
                 {editingId ? (
-                  <Button type="button" variant="outline" onClick={resetForm}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                    onClick={resetForm}
+                  >
                     Cancel
                   </Button>
                 ) : null}
@@ -295,12 +335,12 @@ export function ProductManager() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card className="min-w-0 overflow-hidden">
+          <CardHeader className="p-4 sm:p-6">
             <CardTitle>Catalog</CardTitle>
             <CardDescription>{products.length} product(s)</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             {listLoading ? (
               <CatalogSkeleton />
             ) : products.length === 0 ? (
@@ -309,7 +349,7 @@ export function ProductManager() {
               </p>
             ) : (
               <>
-                <div className="hidden md:block">
+                <div className="hidden overflow-x-auto md:block">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -328,7 +368,7 @@ export function ProductManager() {
                               <img
                                 src={product.imageUrl}
                                 alt={product.name}
-                                className="h-12 w-12 rounded-md object-cover"
+                                className="h-12 w-12 shrink-0 rounded-md object-cover"
                               />
                             ) : (
                               <div className="flex h-12 w-12 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">
@@ -336,15 +376,19 @@ export function ProductManager() {
                               </div>
                             )}
                           </TableCell>
-                          <TableCell>
-                            <div className="font-medium">{product.name}</div>
+                          <TableCell className="max-w-56">
+                            <div className="truncate font-medium">
+                              {product.name}
+                            </div>
                             {product.description ? (
-                              <div className="text-xs text-muted-foreground">
+                              <div className="truncate text-xs text-muted-foreground">
                                 {product.description}
                               </div>
                             ) : null}
                           </TableCell>
-                          <TableCell>{formatMoney(product.price)}</TableCell>
+                          <TableCell className="whitespace-nowrap tabular-nums">
+                            {formatMoney(product.price)}
+                          </TableCell>
                           <TableCell>
                             <StockBadge stock={product.stock} />
                           </TableCell>
@@ -374,32 +418,38 @@ export function ProductManager() {
 
                 <div className="grid gap-3 md:hidden">
                   {products.map((product) => (
-                    <div key={product.id} className="rounded-lg border p-4">
+                    <div
+                      key={product.id}
+                      className="min-w-0 rounded-lg border p-3 sm:p-4"
+                    >
                       {product.imageUrl ? (
                         <img
                           src={product.imageUrl}
                           alt={product.name}
-                          className="mb-3 h-32 w-full rounded-md object-cover"
+                          className="mb-3 h-36 w-full rounded-md object-cover"
                         />
                       ) : null}
                       <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <div className="font-medium">{product.name}</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="break-words font-medium">
+                            {product.name}
+                          </div>
                           {product.description ? (
-                            <p className="mt-1 text-sm text-muted-foreground">
+                            <p className="mt-1 line-clamp-3 text-sm break-words text-muted-foreground">
                               {product.description}
                             </p>
                           ) : null}
                         </div>
                         <StockBadge stock={product.stock} />
                       </div>
-                      <p className="mt-2 text-sm">
+                      <p className="mt-2 text-sm font-semibold tabular-nums">
                         {formatMoney(product.price)}
                       </p>
-                      <div className="mt-3 flex gap-2">
+                      <div className="mt-3 grid grid-cols-2 gap-2">
                         <Button
                           size="sm"
                           variant="outline"
+                          className="w-full"
                           onClick={() => startEdit(product)}
                         >
                           Edit
@@ -407,6 +457,7 @@ export function ProductManager() {
                         <Button
                           size="sm"
                           variant="destructive"
+                          className="w-full"
                           onClick={() => onDelete(product)}
                         >
                           Delete
@@ -431,9 +482,9 @@ function CatalogSkeleton() {
         {Array.from({ length: 4 }, (_, index) => (
           <div key={index} className="flex items-center gap-4">
             <Skeleton className="h-12 w-12 rounded-md" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-4 w-40" />
-              <Skeleton className="h-3 w-64" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <Skeleton className="h-4 w-40 max-w-full" />
+              <Skeleton className="h-3 w-64 max-w-full" />
             </div>
             <Skeleton className="h-4 w-16" />
             <Skeleton className="h-5 w-20" />
@@ -460,10 +511,18 @@ function CatalogSkeleton() {
 
 function StockBadge({ stock }: { stock: number }) {
   if (stock === 0) {
-    return <Badge variant="destructive">Out of stock</Badge>;
+    return (
+      <Badge variant="destructive" className="shrink-0 whitespace-nowrap">
+        Out of stock
+      </Badge>
+    );
   }
 
-  return <Badge variant="secondary">{stock} in stock</Badge>;
+  return (
+    <Badge variant="secondary" className="shrink-0 whitespace-nowrap">
+      {stock} in stock
+    </Badge>
+  );
 }
 
 function formatMoney(amount: number) {

@@ -3,6 +3,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { API_ROUTES, ROUTES } from "@/constants/routes";
 import type { CartDto } from "@cart/application/serializeCart";
 import type { ProductDto } from "@product/application/serializeProduct";
 import { notifyCartUpdated, totalCartQuantity } from "@shared/utils/cartEvents";
@@ -18,7 +19,7 @@ export function FeaturedProducts() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/products")
+    fetch(API_ROUTES.PRODUCTS)
       .then(async (response) => {
         if (!response.ok) {
           throw new Error(await readError(response));
@@ -39,7 +40,7 @@ export function FeaturedProducts() {
     setPendingId(productId);
     setError(null);
     try {
-      const response = await fetch("/api/cart/items", {
+      const response = await fetch(API_ROUTES.CART_ITEMS, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, quantity: 1 }),
@@ -49,7 +50,7 @@ export function FeaturedProducts() {
       }
       const cart = (await response.json()) as CartDto;
       notifyCartUpdated(totalCartQuantity(cart.items));
-      window.location.href = "/cart";
+      window.location.href = ROUTES.CART;
     } catch (cause) {
       setError(
         cause instanceof Error ? cause.message : "Could not add to cart",

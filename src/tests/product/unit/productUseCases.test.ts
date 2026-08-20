@@ -53,7 +53,7 @@ describe("product use cases", () => {
 
   it("throws when updating a missing product", async () => {
     await expect(
-      updateProduct(repository, crypto.randomUUID(), { name: "X" }),
+      updateProduct(repository, crypto.randomUUID(), { name: "Unknown" }),
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 

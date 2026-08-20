@@ -1,5 +1,6 @@
 import {
   assertProductImage,
+  productImageExtension,
   type ProductImageFile,
 } from "@product/domain/productImage";
 import type {
@@ -16,7 +17,7 @@ export class InMemoryProductImageStorage implements ProductImageStorage {
     file: ProductImageFile,
   ): Promise<UploadedProductImage> {
     const type = assertProductImage(file);
-    const extension = type === "png" ? "png" : "jpg";
+    const extension = productImageExtension(type);
     const key = `products/${productId}/${crypto.randomUUID()}.${extension}`;
     this.files.set(key, file.bytes);
     return {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { API_ROUTES } from "@/constants/routes";
 import type { CartDto } from "@cart/application/serializeCart";
 import { CART_UPDATED_EVENT, totalCartQuantity } from "@shared/utils/cartEvents";
 
@@ -9,7 +10,7 @@ export function CartBadge() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/cart")
+    fetch(API_ROUTES.CART)
       .then((response) => (response.ok ? response.json() : null))
       .then((cart: CartDto | null) => {
         if (cart) {

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { API_ROUTES, ROUTES } from "@/constants/routes";
 import type { CartDto } from "@cart/application/serializeCart";
 import type { ProductDto } from "@product/application/serializeProduct";
 import { notifyCartUpdated, totalCartQuantity } from "@shared/utils/cartEvents";
@@ -35,8 +36,8 @@ export function CartView() {
 
   async function load() {
     const [productsResponse, cartResponse] = await Promise.all([
-      fetch("/api/products"),
-      fetch("/api/cart"),
+      fetch(API_ROUTES.PRODUCTS),
+      fetch(API_ROUTES.CART),
     ]);
 
     if (!cartResponse.ok) {
@@ -63,7 +64,7 @@ export function CartView() {
 
   async function setQuantity(productId: string, quantity: number) {
     await mutate(productId, () =>
-      fetch(`/api/cart/items/${productId}`, {
+      fetch(API_ROUTES.cartItem(productId), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ quantity }),
@@ -73,7 +74,7 @@ export function CartView() {
 
   async function removeItem(productId: string) {
     await mutate(productId, () =>
-      fetch(`/api/cart/items/${productId}`, { method: "DELETE" }),
+      fetch(API_ROUTES.cartItem(productId), { method: "DELETE" }),
     );
   }
 
@@ -118,7 +119,7 @@ export function CartView() {
             Your cart is empty. Add items to get started.
           </p>
           <a
-            href="/"
+            href={ROUTES.HOME}
             className="mt-6 inline-flex items-center gap-2 rounded-md bg-neutral-950 px-5 py-2.5 text-sm font-medium text-white hover:bg-neutral-800"
           >
             Continue Shopping
@@ -247,7 +248,7 @@ export function CartView() {
               </Card>
 
               <a
-                href="/"
+                href={ROUTES.HOME}
                 className="flex items-center justify-center gap-2 rounded-xl border bg-card px-4 py-3 text-sm font-medium shadow-sm transition hover:bg-accent"
               >
                 <Store className="size-4 shrink-0" />

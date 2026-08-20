@@ -1,3 +1,4 @@
+import { PRODUCT_DESCRIPTION, PRODUCT_TITLE } from "@/constants/validation";
 import { ValidationError } from "@shared/domain/errors";
 import { Money } from "@shared/domain/money";
 
@@ -92,8 +93,21 @@ export class Product {
       throw new ValidationError("Product id is required");
     }
 
-    if (!props.name.trim()) {
-      throw new ValidationError("Name is required");
+    const name = props.name.trim();
+    if (
+      name.length < PRODUCT_TITLE.MIN_LENGTH ||
+      name.length > PRODUCT_TITLE.MAX_LENGTH
+    ) {
+      throw new ValidationError(
+        `Name must be between ${PRODUCT_TITLE.MIN_LENGTH} and ${PRODUCT_TITLE.MAX_LENGTH} characters`,
+      );
+    }
+
+    const description = props.description?.trim() ?? "";
+    if (description.length > PRODUCT_DESCRIPTION.MAX_LENGTH) {
+      throw new ValidationError(
+        `Description must be ${PRODUCT_DESCRIPTION.MAX_LENGTH} characters or fewer`,
+      );
     }
 
     if (!Number.isFinite(props.price) || props.price <= 0) {

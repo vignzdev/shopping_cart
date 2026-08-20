@@ -1,3 +1,4 @@
+import { PRODUCT_DESCRIPTION, PRODUCT_TITLE } from "@/constants/validation";
 import { z } from "zod";
 import {
   assertProductImage,
@@ -9,8 +10,25 @@ import { NotFoundError, ValidationError } from "@shared/domain/errors";
 import type { Product } from "../domain/product";
 
 const UpdateProductFieldsSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
-  description: z.string().optional(),
+  name: z
+    .string()
+    .trim()
+    .min(
+      PRODUCT_TITLE.MIN_LENGTH,
+      `Name must be at least ${PRODUCT_TITLE.MIN_LENGTH} characters`,
+    )
+    .max(
+      PRODUCT_TITLE.MAX_LENGTH,
+      `Name must be ${PRODUCT_TITLE.MAX_LENGTH} characters or fewer`,
+    )
+    .optional(),
+  description: z
+    .string()
+    .max(
+      PRODUCT_DESCRIPTION.MAX_LENGTH,
+      `Description must be ${PRODUCT_DESCRIPTION.MAX_LENGTH} characters or fewer`,
+    )
+    .optional(),
   price: z.number().positive("Price must be positive").optional(),
   stock: z.number().int().nonnegative("Stock cannot be negative").optional(),
 });

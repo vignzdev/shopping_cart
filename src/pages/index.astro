@@ -1,9 +1,10 @@
 ---
+import { DEFAULT_PAGE_TITLE } from "@/constants/app";
 import { FeaturedProducts } from "../components/FeaturedProducts";
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Shopy">
+<Layout title={DEFAULT_PAGE_TITLE}>
 	<section class="relative overflow-hidden bg-white">
 		<div class="mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
 			<div>

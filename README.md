@@ -51,6 +51,7 @@ src/
 │   ├── infrastructure/  Supabase or in-memory
 │   └── presentation/  CartView UI
 ├── shared/            Money, errors, HTTP helpers, composition root
+├── constants/         App name, validation limits, upload rules, routes
 ├── pages/             Astro routes (UI + /api/*)
 ├── components/        Storefront and product-admin UI
 └── tests/             Unit and integration tests
@@ -72,7 +73,8 @@ HTTP handlers only parse input, call a use case, and map errors. They do not con
 
 **Product**
 
-- Name is required (trimmed).
+- Name is 3–100 characters (trimmed).
+- Description is optional, max 1000 characters.
 - Price must be positive.
 - Stock is a non-negative integer.
 - Image URL and storage key must both be present or both absent.
@@ -86,7 +88,7 @@ HTTP handlers only parse input, call a use case, and map errors. They do not con
 
 **Product images**
 
-- PNG / JPEG / JPG only, max 10 MB.
+- JPEG / PNG / WebP, max 5 MB (`src/constants/upload.ts`).
 - Extension, MIME type, and file signature must agree (a GIF renamed to `.png` is rejected).
 
 ### Persistence
@@ -238,6 +240,8 @@ pnpm dev
 ```
 
 App: [http://localhost:4321](http://localhost:4321)
+
+Astro loads `.env` into `import.meta.env` for local `pnpm dev`. Render injects the same names into `process.env`. The app reads both, so localhost and Docker both work.
 
 Apply `src/shared/infrastructure/supabase/schema.sql` in the Supabase SQL editor before using persistence. Fill in the values from `.env.example`:
 

@@ -8,6 +8,7 @@ import {
   setProductImageStorage,
   setProductRepository,
 } from "@shared/infrastructure/compose";
+import { IMAGE_UPLOAD } from "@/constants/upload";
 import { GIF_BYTES, PNG_BYTES } from "../unit/imageFixtures";
 
 type CookieJar = Map<string, string>;
@@ -189,8 +190,8 @@ describe("products API", () => {
     expect(result.status).toBe(400);
   });
 
-  it("rejects an image larger than 10 MB", async () => {
-    const tooLarge = new Uint8Array(10 * 1024 * 1024 + 1);
+  it("rejects an image larger than the upload limit", async () => {
+    const tooLarge = new Uint8Array(IMAGE_UPLOAD.MAX_SIZE + 1);
     tooLarge.set(PNG_BYTES, 0);
     const body = new FormData();
     body.set("name", "Tea");
@@ -213,6 +214,6 @@ describe("products API", () => {
     );
 
     expect(result.status).toBe(400);
-    expect(result.body).toMatchObject({ error: "Image must be 10 MB or smaller" });
+    expect(result.body).toMatchObject({ error: "Image must be 5 MB or smaller" });
   });
 });

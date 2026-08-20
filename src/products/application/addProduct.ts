@@ -1,3 +1,4 @@
+import { PRODUCT_DESCRIPTION, PRODUCT_TITLE } from "@/constants/validation";
 import { z } from "zod";
 import { Product } from "@product/domain/product";
 import {
@@ -9,8 +10,24 @@ import type { ProductRepository } from "@product/domain/productRepository";
 import { ValidationError } from "@shared/domain/errors";
 
 export const AddProductSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  description: z.string().optional(),
+  name: z
+    .string()
+    .trim()
+    .min(
+      PRODUCT_TITLE.MIN_LENGTH,
+      `Name must be at least ${PRODUCT_TITLE.MIN_LENGTH} characters`,
+    )
+    .max(
+      PRODUCT_TITLE.MAX_LENGTH,
+      `Name must be ${PRODUCT_TITLE.MAX_LENGTH} characters or fewer`,
+    ),
+  description: z
+    .string()
+    .max(
+      PRODUCT_DESCRIPTION.MAX_LENGTH,
+      `Description must be ${PRODUCT_DESCRIPTION.MAX_LENGTH} characters or fewer`,
+    )
+    .optional(),
   price: z.number().positive("Price must be positive"),
   stock: z.number().int().nonnegative("Stock cannot be negative"),
 });
