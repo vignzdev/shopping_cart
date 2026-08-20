@@ -10,7 +10,6 @@ import { notifyCartUpdated, totalCartQuantity } from "@shared/utils/cartEvents";
 import {
   ArrowRight,
   CreditCard,
-  Lock,
   Minus,
   Plus,
   Shield,
@@ -99,7 +98,7 @@ export function CartView() {
   const empty = cart.items.length === 0;
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6">
+    <div className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-6 overflow-x-clip px-4 py-6 sm:px-6 sm:py-8">
       {error ? (
         <Alert className="border-destructive/40 bg-destructive/5">
           <AlertDescription className="text-destructive">
@@ -111,7 +110,7 @@ export function CartView() {
       {loading ? (
         <CartSkeleton />
       ) : empty ? (
-        <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+        <div className="flex min-h-[60vh] flex-col items-center justify-center px-2 text-center">
           <p className="text-xl font-semibold tracking-tight">
             We don't have any products
           </p>
@@ -128,7 +127,7 @@ export function CartView() {
         </div>
       ) : (
         <>
-          <div>
+          <div className="min-w-0">
             <h1 className="text-2xl font-semibold tracking-tight">
               Shopping cart
             </h1>
@@ -137,55 +136,58 @@ export function CartView() {
             </p>
           </div>
 
-          <div className="grid items-start gap-6 lg:grid-cols-[1fr_minmax(0,22rem)]">
-            <Card>
-              <CardHeader>
+          <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+            <Card className="min-w-0 overflow-hidden">
+              <CardHeader className="p-4 sm:p-6">
                 <CardTitle>Your items</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
                 <ul className="divide-y">
                   {cart.items.map((item) => {
                     const imageUrl = imagesById.get(item.productId);
                     return (
                       <li
                         key={item.productId}
-                        className="flex gap-4 py-4 first:pt-0 last:pb-0"
+                        className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:gap-4"
                       >
-                        <div className="size-20 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
-                          {imageUrl ? (
-                            <img
-                              src={imageUrl}
-                              alt={item.name}
-                              className="size-full object-cover"
-                            />
-                          ) : null}
-                        </div>
-                        <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="min-w-0">
-                            <p className="font-medium">{item.name}</p>
+                        <div className="flex min-w-0 items-start gap-3 sm:min-w-0 sm:flex-1">
+                          <div className="size-16 shrink-0 overflow-hidden rounded-lg bg-neutral-100 sm:size-20">
+                            {imageUrl ? (
+                              <img
+                                src={imageUrl}
+                                alt={item.name}
+                                className="size-full object-cover"
+                              />
+                            ) : null}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-medium">{item.name}</p>
                             <p className="mt-0.5 text-sm text-muted-foreground">
                               {formatMoney(item.unitPrice)}
                             </p>
-                          </div>
-                          <div className="flex items-center justify-between gap-4 sm:justify-end">
-                            <QuantityControls
-                              quantity={item.quantity}
-                              disabled={pendingId === item.productId}
-                              onDecrease={() =>
-                                setQuantity(item.productId, item.quantity - 1)
-                              }
-                              onIncrease={() =>
-                                setQuantity(item.productId, item.quantity + 1)
-                              }
-                              onChange={(quantity) =>
-                                setQuantity(item.productId, quantity)
-                              }
-                              onRemove={() => removeItem(item.productId)}
-                            />
-                            <p className="w-20 text-right text-sm font-semibold">
+                            <p className="mt-1 text-sm font-semibold sm:hidden">
                               {formatMoney(item.lineTotal)}
                             </p>
                           </div>
+                        </div>
+                        <div className="flex min-w-0 items-center justify-between gap-3 sm:shrink-0 sm:justify-end">
+                          <QuantityControls
+                            quantity={item.quantity}
+                            disabled={pendingId === item.productId}
+                            onDecrease={() =>
+                              setQuantity(item.productId, item.quantity - 1)
+                            }
+                            onIncrease={() =>
+                              setQuantity(item.productId, item.quantity + 1)
+                            }
+                            onChange={(quantity) =>
+                              setQuantity(item.productId, quantity)
+                            }
+                            onRemove={() => removeItem(item.productId)}
+                          />
+                          <p className="hidden shrink-0 text-right text-sm font-semibold tabular-nums sm:block">
+                            {formatMoney(item.lineTotal)}
+                          </p>
                         </div>
                       </li>
                     );
@@ -194,30 +196,30 @@ export function CartView() {
               </CardContent>
             </Card>
 
-            <aside className="flex flex-col gap-4">
-              <Card>
-                <CardHeader>
+            <aside className="flex min-w-0 flex-col gap-4">
+              <Card className="min-w-0">
+                <CardHeader className="p-4 sm:p-6">
                   <CardTitle>Order Summary</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
                   <div className="space-y-2 text-sm">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-4">
                       <span className="text-muted-foreground">Subtotal</span>
-                      <span>{formatMoney(cart.subtotal)}</span>
+                      <span className="tabular-nums">
+                        {formatMoney(cart.subtotal)}
+                      </span>
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-4">
                       <span className="text-muted-foreground">Shipping</span>
                       <span>Free</span>
                     </div>
                   </div>
 
-                  <div className="flex items-start justify-between border-t pt-4">
+                  <div className="flex items-center justify-between gap-4 border-t pt-4">
                     <span className="font-semibold">Total</span>
-                    <div className="text-right">
-                      <p className="text-lg font-semibold">
-                        {formatMoney(cart.subtotal)}
-                      </p>
-                    </div>
+                    <p className="text-lg font-semibold tabular-nums">
+                      {formatMoney(cart.subtotal)}
+                    </p>
                   </div>
 
                   <Button
@@ -235,7 +237,7 @@ export function CartView() {
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-orange-500">
                     <Shield className="size-5" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm font-semibold">Secure Checkout</p>
                     <p className="text-xs text-muted-foreground">
                       Your payment information is encrypted and secure.
@@ -248,9 +250,9 @@ export function CartView() {
                 href="/"
                 className="flex items-center justify-center gap-2 rounded-xl border bg-card px-4 py-3 text-sm font-medium shadow-sm transition hover:bg-accent"
               >
-                <Store className="size-4" />
+                <Store className="size-4 shrink-0" />
                 Continue Shopping
-                <ArrowRight className="size-4" />
+                <ArrowRight className="size-4 shrink-0" />
               </a>
             </aside>
           </div>
@@ -263,25 +265,24 @@ export function CartView() {
 function CartSkeleton() {
   return (
     <>
-      <div>
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="mt-2 h-4 w-72" />
+      <div className="min-w-0">
+        <Skeleton className="h-8 w-48 max-w-full" />
+        <Skeleton className="mt-2 h-4 w-72 max-w-full" />
       </div>
-      <div className="grid items-start gap-6 lg:grid-cols-[1fr_minmax(0,22rem)]">
-        <Card>
-          <CardHeader>
+      <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+        <Card className="min-w-0">
+          <CardHeader className="p-4 sm:p-6">
             <Skeleton className="h-6 w-28" />
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 p-4 pt-0 sm:p-6 sm:pt-0">
             {Array.from({ length: 3 }, (_, index) => (
-              <div key={index} className="flex gap-4">
-                <Skeleton className="size-20 shrink-0 rounded-lg" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-40" />
+              <div key={index} className="flex gap-3 sm:gap-4">
+                <Skeleton className="size-16 shrink-0 rounded-lg sm:size-20" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton className="h-4 w-40 max-w-full" />
                   <Skeleton className="h-3 w-20" />
-                  <Skeleton className="h-8 w-36" />
+                  <Skeleton className="h-8 w-36 max-w-full" />
                 </div>
-                <Skeleton className="h-4 w-16" />
               </div>
             ))}
           </CardContent>
@@ -322,11 +323,11 @@ function QuantityControls({
   onRemove: () => void;
 }) {
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex min-w-0 items-center gap-1">
       <Button
         size="icon"
         variant="outline"
-        className="size-8"
+        className="size-8 shrink-0"
         disabled={disabled}
         onClick={onDecrease}
         aria-label="Decrease quantity"
@@ -334,9 +335,10 @@ function QuantityControls({
         <Minus />
       </Button>
       <Input
-        className="h-8 w-12 text-center"
+        className="h-8 w-11 min-w-0 shrink-0 px-1 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         type="number"
         min="0"
+        inputMode="numeric"
         value={quantity}
         disabled={disabled}
         onChange={(event) => onChange(Number(event.target.value))}
@@ -344,7 +346,7 @@ function QuantityControls({
       <Button
         size="icon"
         variant="outline"
-        className="size-8"
+        className="size-8 shrink-0"
         disabled={disabled}
         onClick={onIncrease}
         aria-label="Increase quantity"
@@ -354,7 +356,7 @@ function QuantityControls({
       <Button
         size="icon"
         variant="ghost"
-        className="size-8"
+        className="size-8 shrink-0"
         disabled={disabled}
         onClick={onRemove}
         aria-label="Remove item"

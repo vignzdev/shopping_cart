@@ -97,7 +97,7 @@ const path = Astro.url.pathname;
 			</div>
 			<Navbar client:load currentPath={path} />
 		</header>
-		<main>
+		<main class="min-w-0 overflow-x-clip">
 			<slot />
 		</main>
 	</body>

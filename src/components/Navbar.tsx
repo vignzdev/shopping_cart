@@ -24,12 +24,12 @@ type NavbarProps = {
 export function Navbar({ currentPath = "" }: NavbarProps) {
   return (
     <div className="border-b border-neutral-200 bg-neutral-100">
-      <div className="mx-auto flex max-w-7xl items-center px-4 sm:px-6">
+      <div className="mx-auto max-w-7xl overflow-x-auto px-4 sm:px-6">
         <NavigationMenu
           viewport={false}
           className="w-full max-w-none justify-start"
         >
-          <NavigationMenuList className="w-full flex-wrap justify-start gap-0">
+          <NavigationMenuList className="w-max min-w-full flex-nowrap justify-start gap-0 sm:w-full sm:flex-wrap">
             <NavigationMenuItem>
               <NavigationMenuTrigger className={triggerClass}>
                 Shop
